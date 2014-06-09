@@ -1,0 +1,80 @@
+# Common make definitions, customized for each platform
+
+# Definitions required in all program directories to compile and link
+# C programs using gcc.
+
+VERBOSE = N
+
+VERSION = 1.2.22
+#CROSS_COMPILE ?= arm-eabi-4.7-
+CROSS_COMPILE :=
+CC            = $(CROSS_COMPILE)gcc
+CXX           = $(CROSS_COMPILE)g++
+AR            = $(CROSS_COMPILE)ar
+LD            = $(CROSS_COMPILE)ld
+NM            = $(CROSS_COMPILE)nm
+STRIP         = $(CROSS_COMPILE)strip
+OBJCOPY       = $(CROSS_COMPILE)objcopy
+OBJDUMP       = $(CROSS_COMPILE)objdump
+RANLIB        = $(CROSS_COMPILE)ranlib
+
+SHELL         = bash
+CP            = cp
+MV            = mv
+RM            = rm -fr
+HOSTCC        = gcc
+AWK           = awk
+
+LDFLAGS      :=
+
+LDDIR=-L$(ROOT)/lib
+LDLIBS=$(LDDIR) -lapue $(EXTRALIBS)
+
+CFLAGS := -ansi -I$(ROOT)/include \
+          -Wall -O3 \
+          -DLINUX -D_GNU_SOURCE $(EXTRA)
+
+LIBAPUE=$(ROOT)/lib/libapue.a
+
+
+# If you dont want to see every executed command ...
+ifeq ($(VERBOSE), N)
+.SILENT:
+endif
+
+%.o: %.c
+ifeq ($(VERBOSE), N)
+	@echo 'CC' $(PWD)/$@
+endif
+	$(CC) -c -o $*.o $(CFLAGS) $<
+
+%.o: %.S
+ifeq ($(VERBOSE), N)
+	@echo 'AS' $(PWD)/$@
+endif
+	$(CC) -c -o $*.o $(AFLAGS) $<
+
+%.o: %.cxx
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
+
+%.o: %.C
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
+
+%.o: %.cc
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
+
+%.d: %.c
+	$(CC) -M $(CFLAGS) $< > $@
+	$(CC) -M $(CFLAGS) $< | sed s/\\.o/.d/ >> $@
+
+# Common temp files to delete from each directory.
+TEMPFILES=core core.* *.o temp.* *.out *.elf *.dump *.depend *.bin *.map
