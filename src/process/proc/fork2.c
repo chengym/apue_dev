@@ -19,7 +19,7 @@ int main(void)
          * Here's where we'd continue executing, knowing that when
          * we're done, init will reap our status.
          */
-        sleep(2);
+        sleep(1);
         printf("second child, parent pid = %ld\n", (long) getppid());
         exit(0);
     }

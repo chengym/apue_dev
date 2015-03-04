@@ -1,6 +1,5 @@
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../..
+include $(TOP)/Make.rules
 
 PROGS =	csize settty t_getpass t_isatty t_raw t_ttyname winch
 
@@ -12,4 +11,3 @@ $(PROGS):$(LIBAPUE)
 clean:
 	@ rm -f $(PROGS) $(TEMPFILES) *.o
 	@ echo "Finish cleanup $(PROGS)......"
-include $(ROOT)/Make.libapue.inc

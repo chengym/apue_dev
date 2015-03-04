@@ -1,12 +1,7 @@
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../..
+include $(TOP)/Make.rules
 
-ifeq "$(PLATFORM)" "linux"
-  MEMSTR = memstr
-else
-  MEMSTR =
-endif
+MEMSTR = memstr
 
 PROGS =	buf fgetsfputs getcharbug getcputc mkstemp tempfiles
 
@@ -19,4 +14,3 @@ $(PROGS):$(LIBAPUE)
 clean:
 	@ rm -f $(PROGS) $(TEMPFILES) *.o $(MEMSTR)
 	@ echo "Finish cleanup $(PROGS)......"
-include $(ROOT)/Make.libapue.inc

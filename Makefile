@@ -8,6 +8,8 @@ DIRS = lib \
 	   src/process/proc \
 	   src/process/threadctl \
 	   src/process/threads \
+	   src/stdio \
+	   src/termios \
 	   src/singal/signals
 
 #sockets advio daemons datafiles db environ         \
