@@ -5,11 +5,13 @@ int main(int argc, char *argv[])
 {
     int val;
 
-    if (argc != 2)
-        err_quit("usage: a.out <descriptor#>");
+    if (argc != 2) {
+        apue_print("usage: a.out <descriptor#>");
+        exit(-1);
+    }
 
     if ((val = fcntl(atoi(argv[1]), F_GETFL, 0)) < 0)
-        err_sys("fcntl error for fd %d", atoi(argv[1]));
+        apue_print("fcntl error for fd %d", atoi(argv[1]));
 
     switch (val & O_ACCMODE) {
         case O_RDONLY:
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
             break;
 
         default:
-            err_dump("unknown access mode");
+            apue_print("unknown access mode");
     }
 
     if (val & O_APPEND)

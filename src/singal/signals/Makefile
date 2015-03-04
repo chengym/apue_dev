@@ -1,15 +1,7 @@
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../../..
+include $(TOP)/Make.rules
 
-CLD =
-
-ifeq "$(PLATFORM)" "linux"
-  CLD = child
-endif
-ifeq "$(PLATFORM)" "solaris"
-  CLD = child
-endif
+CLD = child
 
 PROGS =	critical mask read1 read2 reenter sigtstp sigusr suspend1 suspend2
 MOREPROGS = systest2 tsleep2
@@ -28,4 +20,3 @@ systest2:systest2.o system.o
 clean:
 	@ rm -f $(PROGS) $(MOREPROGS) $(TEMPFILES) *.o file.hole $(CLD)
 	@ echo "Finish cleanup $(PROGS)......"
-include $(ROOT)/Make.libapue.inc

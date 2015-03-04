@@ -1,12 +1,7 @@
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../../..
+include $(TOP)/Make.rules
 
-ifeq "$(PLATFORM)" "linux"
-	ZAP = zap
-else
-	ZAP =
-endif
+ZAP = zap
 
 PROGS =	access cdpwd changemod devrdev filetype mycd umask unlink $(ZAP)
 MOREPROGS = ftw8
@@ -25,5 +20,3 @@ clean:
 	@ echo "Cleaning..."
 	@ rm -f $(PROGS) $(MOREPROGS) $(TEMPFILES) *.o $(ZAP)
 	@ echo "Finish cleanup $(PROGS)......"
-
-include $(ROOT)/Make.libapue.inc

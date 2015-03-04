@@ -1,7 +1,15 @@
 TOP =.
 include $(TOP)/Make.rules
 
-DIRS = lib intro
+DIRS = lib \
+	   intro \
+	   src/fileio/fileio \
+	   src/fileio/filedir \
+	   src/process/proc \
+	   src/process/threadctl \
+	   src/process/threads \
+	   src/singal/signals
+
 #sockets advio daemons datafiles db environ         \
 #	   fileio filedir ipc1 ipc2 proc pty relation signals standards \
 #	   stdio termios threadctl threads printer exercises

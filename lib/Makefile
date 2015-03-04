@@ -10,6 +10,7 @@ all:$(LIBAPUE)
 
 $(LIBAPUE):	$(SRCS)
 	 @$(CC) -fPIC -shared -o $@ $(CFLAGS) $?
+	 @sudo $(CP) $(LIBAPUE) /lib/x86_64-linux-gnu
 	 @echo "Finish build $@"
 
 clean:

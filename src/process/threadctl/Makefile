@@ -1,19 +1,9 @@
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../../..
+include $(TOP)/Make.rules
 
-TOUT =
-ifeq "$(PLATFORM)" "freebsd"
-  EXTRALIBS = -pthread
-endif
-ifeq "$(PLATFORM)" "linux"
-  EXTRALIBS = -pthread
-  TOUT = timeout.o
-endif
-ifeq "$(PLATFORM)" "solaris"
-  EXTRALIBS = -lpthread
-  TOUT = timeout.o
-endif
+CFLAGS += -pthread
+
+TOUT = timeout.o
 
 PROGS =	atfork suspend
 
@@ -24,7 +14,5 @@ $(PROGS): $(LIBAPUE)
 	@ echo "Finish build $@"
 
 clean:
-	@ rm -f $(PROGS) $(TEMPFILES) *.o
+	@ rm -f $(PROGS) *.o
 	@ echo "Finish cleanup $(PROGS)......"
-
-include $(ROOT)/Make.libapue.inc

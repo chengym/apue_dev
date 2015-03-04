@@ -1,37 +1,18 @@
-ROOT=..
-EXTRALIBS=-pthread
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=../../..
+include $(TOP)/Make.rules
 
-BAR =
-ifeq "$(PLATFORM)" "macos"
-  TLOCK =
-  EXTRALIBS=-pthread
-else
-  TLOCK = timedlock
-endif
-ifeq "$(PLATFORM)" "linux"
-  BAR = barrier
-  EXTRALIBS=-pthread -lrt
-endif
-ifeq "$(PLATFORM)" "freebsd"
-  BAR = barrier
-  EXTRALIBS=-pthread
-endif
-ifeq "$(PLATFORM)" "solaris"
-  BAR = barrier
-  EXTRALIBS=-lpthread -lrt
-endif
+BAR = barrier
+EXTRALIBS=-pthread -lrt
+CFLAGS += $(EXTRALIBS)
 
 PROGS = badexit2 cleanup exitstatus threadid
 
 all:$(PROGS) condvar.o maketimeout.o mutex1.o mutex2.o mutex3.o rwlock.o $(TLOCK) $(BAR)
 
-$(PROGS):$(LIBAPUE)
+$(PROGS):
 	@ $(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
 	@ echo "Finish build $@"
 
 clean:
-	@ rm -f $(PROGS) $(TEMPFILES) *.o $(TLOCK) $(BAR)
+	@ rm -f $(PROGS) *.o $(TLOCK) $(BAR)
 	@ echo "Finish cleanup $(PROGS)......"
-include $(ROOT)/Make.libapue.inc
