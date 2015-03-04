@@ -1,27 +1,17 @@
 #
 # Makefile for misc library.
 #
-ROOT=..
-PLATFORM=$(shell $(ROOT)/systype.sh)
-include $(ROOT)/Make.defines.$(PLATFORM)
+TOP=..
+include $(TOP)/Make.rules
 
-LIBMISC	= libapue.a
-OBJS   = bufargs.o cliconn.o clrfl.o \
-			daemonize.o error.o errorlog.o lockreg.o locktest.o \
-			openmax.o pathalloc.o popen.o prexit.o prmask.o \
-			ptyfork.o ptyopen.o readn.o recvfd.o senderr.o sendfd.o \
-			servaccept.o servlisten.o setfd.o setfl.o signal.o signalintr.o \
-			sleepus.o spipe.o tellwait.o ttymodes.o writen.o
+SRCS = $(wildcard *.c .cxx)
 
-all:$(LIBMISC) sleep.o
+all:$(LIBAPUE)
 
-$(LIBMISC):	$(OBJS)
-	@ $(AR) rv $(LIBMISC) $?
-	@ $(RANLIB) $(LIBMISC)
-	@ echo "Finish build $@"
+$(LIBAPUE):	$(SRCS)
+	 @$(CC) -fPIC -shared -o $@ $(CFLAGS) $?
+	 @echo "Finish build $@"
 
 clean:
-	@ rm -f *.o a.out core temp.* $(LIBMISC)
-	@ echo "Finish cleanup......"
-
-include $(ROOT)/Make.libapue.inc
+	 @rm -f *.o a.out core temp.* $(LIBAPUE)
+	 @echo "Finish cleanup......"

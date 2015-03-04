@@ -10,7 +10,7 @@ int main(void)
     int status;
 
     if (signal(SIGINT, sig_int) == SIG_ERR)
-        err_sys("signal error");
+        apue_print("signal error");
 
     printf("%% ");              /* print prompt (printf requires %% to print %) */
     while (fgets(buf, MAXLINE, stdin) != NULL) {
@@ -18,16 +18,16 @@ int main(void)
             buf[strlen(buf) - 1] = 0;   /* replace newline with null */
 
         if ((pid = fork()) < 0) {
-            err_sys("fork error");
+            apue_print("fork error");
         } else if (pid == 0) {  /* child */
             execlp(buf, buf, (char *) 0);
-            err_ret("couldn't execute: %s", buf);
+            apue_print("couldn't execute: %s", buf);
             exit(127);
         }
 
         /* parent */
         if ((pid = waitpid(pid, &status, 0)) < 0)
-            err_sys("waitpid error");
+            apue_print("waitpid error");
         printf("%% ");
     }
     exit(0);

@@ -13,7 +13,7 @@ static struct cmsghdr *cmptr = NULL;    /* malloc'ed first time */
  */
 int recv_fd(int fd, ssize_t(*userfunc) (int, const void *, size_t))
 {
-    int newfd, nr, status;
+    int newfd = 0, nr, status;
     char *ptr;
     char buf[MAXLINE];
     struct iovec iov[1];

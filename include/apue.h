@@ -1,6 +1,3 @@
-/*
- * Our own header, to be included before all standard system headers.
- */
 #ifndef	_APUE_H
 #define	_APUE_H
 
@@ -19,23 +16,18 @@
 #include <sys/ioctl.h>
 #endif
 
-#include <stdio.h>              /* for convenience */
-#include <stdlib.h>             /* for convenience */
-#include <stddef.h>             /* for offsetof */
-#include <string.h>             /* for convenience */
-#include <unistd.h>             /* for convenience */
-#include <signal.h>             /* for SIG_ERR */
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
 
 #define	MAXLINE	4096            /* max line length */
 
-/*
- * Default file access permissions for new files.
- */
+/* Default file access permissions for new files. */
 #define	FILE_MODE	(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
-
-/*
- * Default permissions for new directories.
- */
+/* Default permissions for new directories. */
 #define	DIR_MODE	(FILE_MODE | S_IXUSR | S_IXGRP | S_IXOTH)
 
 typedef void Sigfunc(int);      /* for signal handlers */
@@ -105,13 +97,13 @@ pid_t lock_test(int, int, off_t, int, off_t);   /* {Prog locktest} */
 #define	is_write_lockable(fd, offset, whence, len) \
 			(lock_test((fd), F_WRLCK, (offset), (whence), (len)) == 0)
 
-void err_msg(const char *, ...);        /* {App misc_source} */
-void err_dump(const char *, ...) __attribute__ ((noreturn));
-void err_quit(const char *, ...) __attribute__ ((noreturn));
+void err_msg(const char *, ...);
+void err_dump(const char *, ...);
+void err_quit(const char *, ...);
 void err_cont(int, const char *, ...);
-void err_exit(int, const char *, ...) __attribute__ ((noreturn));
+void err_exit(int, const char *, ...);
 void err_ret(const char *, ...);
-void err_sys(const char *, ...) __attribute__ ((noreturn));
+void err_sys(const char *, ...);
 
 void log_msg(const char *, ...);        /* {App misc_source} */
 void log_open(const char *, int, int);
@@ -134,6 +126,8 @@ void WAIT_CHILD(void);
 #else
 #define APUE_DEBUG_E printf
 #endif
+
+#define apue_print(format, ...) printf(format, ##__VA_ARGS__)
 
 #ifdef APUE_ASSERT_ENABLE
 #define APUE_ASSERT(x) \

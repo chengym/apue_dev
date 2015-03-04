@@ -6,9 +6,11 @@ int main(void)
 
     pid = fork();
     if (0 == pid) { 
-        APUE_DEBUG_E("hello world from child process ID %ld\n", (long) getpid());
+        apue_print("this is child PID - %ld\n", (long)getpid());
         exit(0);
     }
-    APUE_DEBUG_E("hello world from parents %d child process ID %ld\n", (long) getpid(), pid);
+
+    apue_print("this is parent PID - %ld and child PID - %ld\n",
+            (long) getpid(), (long)pid);
     exit(0);
 }

@@ -1,37 +1,69 @@
+VERBOSE = N
 VERSION = 1.2.22
-CROSS_COMPILE ?= arm-eabi-4.7-
-CROSS_PATH    = $(CROSS_COMPILE)
-TEE_PLATFORM  ?= helan
-BUILD_TIME    = $(shell date '+%y-%m-%d %R')
 
-# toolchain
-CC            = $(CROSS_PATH)gcc
-CXX           = $(CROSS_PATH)g++
-AR            = $(CROSS_PATH)ar
-LD            = $(CROSS_PATH)ld
-NM            = $(CROSS_PATH)nm
-STRIP         = $(CROSS_PATH)strip
-OBJCOPY       = $(CROSS_PATH)objcopy
-OBJDUMP       = $(CROSS_PATH)objdump
-RANLIB        = $(CROSS_PATH)ranlib
+CC            = gcc
+CXX           = g++
+AR            = ar
+LD            = ld
+NM            = nm
+STRIP         = strip
+OBJCOPY       = objcopy
+OBJDUMP       = objdump
+RANLIB        = ranlib
 
 SHELL         = bash
 CP            = cp
 MV            = mv
-RM            = rm
+RM            = rm -fr
 HOSTCC        = gcc
+AWK           = awk
+
+LDFLAGS      :=
+
+LDDIR=-L$(TOP)/lib
+LDLIBS=$(LDDIR) -lapue
+
+CFLAGS := -ansi -I$(TOP)/include \
+          -Wall -O3 \
+          -DLINUX -D_GNU_SOURCE
+
+LIBAPUE=$(TOP)/lib/libapue.so
 
 # If you dont want to see every executed command ...
+
+%.o: %.c
 ifeq ($(VERBOSE), N)
-.SILENT:
+	@echo 'CC' $(PWD)/$@
 endif
+	$(CC) $(CFLAGS) -c $<
 
-# build options
-CFLAGS      += -Wall -fno-builtin -marm -march=armv7-a -msoft-float \
-               -DTEE_CONFIG_TW -DTEE_TW_VERSION="\"$(VERSION)\"" \
-               -DTEE_BUILD_TIME="\"$(BUILD_TIME)\""
-CXXFLAGS    += $(CFLAGS)
-AFLAGS      += -march=armv7-a -Wall
-LDFLAGS     += -nostartfiles -nostdlib -static
+%.o: %.S
+ifeq ($(VERBOSE), N)
+	@echo 'AS' $(PWD)/$@
+endif
+	$(CC) -c -o $*.o $(AFLAGS) $<
 
+%.o: %.cxx
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
 
+%.o: %.C
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
+
+%.o: %.cc
+ifeq ($(VERBOSE), N)
+	@echo 'CXX' $(PWD)/$@
+endif
+	$(CXX) -c -o $*.o $(CXXFLAGS) $<
+
+%.d: %.c
+	$(CC) -M $(CFLAGS) $< > $@
+	$(CC) -M $(CFLAGS) $< | sed s/\\.o/.d/ >> $@
+
+# Common temp files to delete from each directory.
+TEMPFILES=core core.* *.o temp.* *.out *.elf *.dump *.depend *.bin *.map
