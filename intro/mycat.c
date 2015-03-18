@@ -1,4 +1,9 @@
-#include "apue.h"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #define	BUFFSIZE	4096
 
@@ -7,12 +12,15 @@ int main(void)
     int n;
     char buf[BUFFSIZE];
 
-    while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0)
-        if (write(STDOUT_FILENO, buf, n) != n)
-            apue_print("write error");
+    while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0) {
+        if (write(STDOUT_FILENO, buf, n) != n) {
+            perror("write");
+        }
+    }
 
-    if (n < 0)
-        apue_print("read error");
+    if (n < 0) {
+        perror("read");
+    }
 
-    exit(0);
+    return 0;
 }

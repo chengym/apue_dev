@@ -9,7 +9,7 @@ MOREPROGS = systest1 systest3
 
 all:$(PROGS) $(MOREPROGS) system.o $(ACCT)
 
-$(PROGS):$(LIBAPUE)
+$(PROGS):
 	@ $(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
 	@ echo "Finish build $@"
 

@@ -1,5 +1,25 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <sys/times.h>
+
+static void pr_exit(int status)
+{
+    if (WIFEXITED(status))
+        printf("normal termination, exit status = %d\n", WEXITSTATUS(status));
+    else if (WIFSIGNALED(status))
+        printf("abnormal termination, signal number = %d%s\n", WTERMSIG(status),
+#ifdef	WCOREDUMP
+               WCOREDUMP(status) ? " (core file generated)" : "");
+#else
+               "");
+#endif
+    else if (WIFSTOPPED(status))
+        printf("child stopped, signal number = %d\n", WSTOPSIG(status));
+}
+
 
 static void pr_times(clock_t, struct tms *, struct tms *);
 static void do_cmd(char *);
@@ -23,13 +43,13 @@ static void do_cmd(char *cmd)
     printf("\ncommand: %s\n", cmd);
 
     if ((start = times(&tmsstart)) == -1)       /* starting values */
-        err_sys("times error");
+        perror("times");
 
     if ((status = system(cmd)) < 0)     /* execute command */
-        err_sys("system() error");
+        perror("system()");
 
     if ((end = times(&tmsend)) == -1)   /* ending values */
-        err_sys("times error");
+        perror("times");
 
     pr_times(end - start, &tmsstart, &tmsend);
     pr_exit(status);
@@ -41,7 +61,7 @@ static void pr_times(clock_t real, struct tms *tmsstart, struct tms *tmsend)
 
     if (clktck == 0)            /* fetch clock ticks per second first time */
         if ((clktck = sysconf(_SC_CLK_TCK)) < 0)
-            err_sys("sysconf error");
+            perror("sysconf");
 
     printf("  real:  %7.2f\n", real / (double) clktck);
     printf("  user:  %7.2f\n",

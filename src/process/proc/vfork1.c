@@ -1,23 +1,28 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-int globvar = 6;                /* external variable in initialized data */
+int globvar = 6;
 
 int main(void)
 {
-    int var;                    /* automatic variable on the stack */
+    int var;
     pid_t pid;
 
     var = 88;
-    printf("before vfork\n");   /* we don't flush stdio */
+    printf("before vfork\n");
     if ((pid = vfork()) < 0) {
-        err_sys("vfork error");
-    } else if (pid == 0) {      /* child */
-        globvar++;              /* modify parent's variables */
+        perror("vfork");
+        return -1;
+    } else if (pid == 0) {
+        /* child */
+        globvar++;
         var++;
-        _exit(0);               /* child terminates */
+        exit(0);
     }
 
     /* parent continues here */
     printf("pid = %ld, glob = %d, var = %d\n", (long) getpid(), globvar, var);
-    exit(0);
+    return 0;
 }

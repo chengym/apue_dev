@@ -1,4 +1,6 @@
-#include "apue.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
@@ -6,11 +8,15 @@ int main(int argc, char *argv[])
     char **ptr;
     extern char **environ;
 
-    for (i = 0; i < argc; i++)  /* echo all command-line args */
+    /* echo all command-line args */
+    for (i = 0; i < argc; i++) {
         printf("argv[%d]: %s\n", i, argv[i]);
+    }
 
-    for (ptr = environ; *ptr != 0; ptr++)       /* and all env strings */
+    /* and all env strings */
+    for (ptr = environ; *ptr != 0; ptr++) {
         printf("%s\n", *ptr);
+    }
 
-    exit(0);
+    return 0;
 }
