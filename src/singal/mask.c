@@ -1,4 +1,11 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <setjmp.h>
 #include <time.h>
 
@@ -7,12 +14,39 @@ static void sig_alrm(int);
 static sigjmp_buf jmpbuf;
 static volatile sig_atomic_t canjump;
 
+static void pr_mask(const char *str)
+{
+    sigset_t sigset;
+    int errno_save;
+
+    errno_save = errno;         /* we can be called by signal handlers */
+    if (sigprocmask(0, NULL, &sigset) < 0) {
+        perror("sigprocmask error");
+    } else {
+        printf("%s", str);
+        if (sigismember(&sigset, SIGINT))
+            printf(" SIGINT");
+        if (sigismember(&sigset, SIGQUIT))
+            printf(" SIGQUIT");
+        if (sigismember(&sigset, SIGUSR1))
+            printf(" SIGUSR1");
+        if (sigismember(&sigset, SIGALRM))
+            printf(" SIGALRM");
+
+        /* remaining signals can go here  */
+
+        printf("\n");
+    }
+
+    errno = errno_save;         /* restore errno */
+}
+
 int main(void)
 {
     if (signal(SIGUSR1, sig_usr1) == SIG_ERR)
-        err_sys("signal(SIGUSR1) error");
+        perror("signal(SIGUSR1) error");
     if (signal(SIGALRM, sig_alrm) == SIG_ERR)
-        err_sys("signal(SIGALRM) error");
+        perror("signal(SIGALRM) error");
 
     pr_mask("starting main: "); /* {Prog prmask} */
 

@@ -1,4 +1,11 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
 
 static void sig_int(int signo)
 {
@@ -13,10 +20,10 @@ static void sig_chld(int signo)
 int main(void)
 {
     if (signal(SIGINT, sig_int) == SIG_ERR)
-        err_sys("signal(SIGINT) error");
+        perror("signal(SIGINT) error");
     if (signal(SIGCHLD, sig_chld) == SIG_ERR)
-        err_sys("signal(SIGCHLD) error");
+        perror("signal(SIGCHLD) error");
     if (system("/bin/ed") < 0)
-        err_sys("system() error");
+        perror("system() error");
     exit(0);
 }

@@ -5,6 +5,7 @@ ACCT=pracct
 ACCTFLAGS = -DHAS_AXSIG -DHAS_ACORE
 
 PROGS =	echoall exec1 exec2 fork1 fork2 nice pruids tellwait1 tellwait2 test1 times1 vfork1 wait1
+PROGS += waitpid
 MOREPROGS = systest1 systest3
 
 all:$(PROGS) $(MOREPROGS) system.o $(ACCT)

@@ -1,6 +1,14 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 static void sig_alrm(int);
+
+#define MAXLINE 4096
 
 int main(void)
 {
@@ -8,11 +16,11 @@ int main(void)
     char line[MAXLINE];
 
     if (signal(SIGALRM, sig_alrm) == SIG_ERR)
-        err_sys("signal(SIGALRM) error");
+        perror("signal(SIGALRM) error");
 
     alarm(10);
     if ((n = read(STDIN_FILENO, line, MAXLINE)) < 0)
-        err_sys("read error");
+        perror("read error");
     alarm(0);
 
     write(STDOUT_FILENO, line, n);

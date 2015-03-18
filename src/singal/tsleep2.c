@@ -1,4 +1,10 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 unsigned int sleep2(unsigned int);
 static void sig_int(int);
@@ -8,7 +14,7 @@ int main(void)
     unsigned int unslept;
 
     if (signal(SIGINT, sig_int) == SIG_ERR)
-        err_sys("signal(SIGINT) error");
+        perror("signal(SIGINT) error");
     unslept = sleep2(5);
     printf("sleep2 returned: %u\n", unslept);
     exit(0);

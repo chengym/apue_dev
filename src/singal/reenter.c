@@ -1,4 +1,12 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
 #include <pwd.h>
 
 static void my_alarm(int signo)
@@ -7,7 +15,7 @@ static void my_alarm(int signo)
 
     printf("in signal handler\n");
     if ((rootptr = getpwnam("root")) == NULL)
-        err_sys("getpwnam(root) error");
+        perror("getpwnam(root) error");
     alarm(1);
 }
 
@@ -19,7 +27,7 @@ int main(void)
     alarm(1);
     for (;;) {
         if ((ptr = getpwnam("sar")) == NULL)
-            err_sys("getpwnam error");
+            perror("getpwnam error");
         if (strcmp(ptr->pw_name, "sar") != 0)
             printf("return value corrupted!, pw_name = %s\n", ptr->pw_name);
     }

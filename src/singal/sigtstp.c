@@ -1,4 +1,10 @@
-#include "apue.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define	BUFFSIZE	1024
 
@@ -39,10 +45,10 @@ int main(void)
 
     while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0)
         if (write(STDOUT_FILENO, buf, n) != n)
-            err_sys("write error");
+            perror("write error");
 
     if (n < 0)
-        err_sys("read error");
+        perror("read error");
 
     exit(0);
 }
