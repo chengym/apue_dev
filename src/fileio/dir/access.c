@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
     if (argc != 2) {
-        printf("usage: a.out <pathname>");
+        printf("usage: a.out <pathname>\n");
         return -1;
     }
 
@@ -15,9 +15,11 @@ int main(int argc, char *argv[])
         perror("access");
     else
         printf("read access OK\n");
+
     if (open(argv[1], O_RDONLY) < 0)
         perror("open");
     else
         printf("open for reading OK\n");
+
     exit(0);
 }

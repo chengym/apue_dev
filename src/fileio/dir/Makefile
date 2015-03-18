@@ -3,17 +3,19 @@ include $(TOP)/Make.rules
 
 ZAP = zap
 
-PROGS =	access cdpwd changemod devrdev filetype mycd umask unlink $(ZAP)
+PROGS =	access cdpwd chmod devrdev filetype mycd umask unlink $(ZAP)
+PROGS += stat
+PROGS += walk_dir
 MOREPROGS = ftw8
 
 all: $(PROGS) $(MOREPROGS)
 
-$(PROGS): $(LIBAPUE)
-	@ $(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS) $(LDLIBS)
+$(PROGS):
+	@ $(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
 	@ echo "Finish build $@"
 
-ftw8: ftw8.c $(LIBAPUE)
-	@ $(CC) $(CFLAGS) $(NAMEMAX) ftw8.c -o ftw8 $(LDFLAGS) $(LDLIBS)
+ftw8: ftw8.c
+	@ $(CC) $(CFLAGS) $(NAMEMAX) ftw8.c -o ftw8 $(LDFLAGS)
 	@ echo "Finish build $@"
 
 clean:

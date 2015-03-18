@@ -5,8 +5,8 @@ PROGS =	fileflags hole mycat seek
 
 all: $(PROGS) setfl.o
 
-$(PROGS): $(LIBAPUE)
-	@$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS) $@.c
+$(PROGS):
+	@$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $@.c
 	@echo "Finish build $@"
 
 clean:

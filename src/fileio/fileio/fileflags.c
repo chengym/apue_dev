@@ -1,4 +1,7 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 int main(int argc, char *argv[])
@@ -6,12 +9,13 @@ int main(int argc, char *argv[])
     int val;
 
     if (argc != 2) {
-        apue_print("usage: a.out <descriptor#>");
+        printf("usage: a.out <descriptor#>");
         exit(-1);
     }
 
-    if ((val = fcntl(atoi(argv[1]), F_GETFL, 0)) < 0)
-        apue_print("fcntl error for fd %d", atoi(argv[1]));
+    if ((val = fcntl(atoi(argv[1]), F_GETFL, 0)) < 0) {
+        printf("fcntl error for fd %d", atoi(argv[1]));
+    }
 
     switch (val & O_ACCMODE) {
         case O_RDONLY:
@@ -27,7 +31,7 @@ int main(int argc, char *argv[])
             break;
 
         default:
-            apue_print("unknown access mode");
+            printf("unknown access mode");
     }
 
     if (val & O_APPEND)
