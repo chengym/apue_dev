@@ -17,7 +17,7 @@ static int IS_DIR(const char *path)
     return S_ISDIR(st.st_mode);
 }
 
-static void _walk_for_each(const char *path,
+static void do_generic_walk(const char *path,
         char(*file_path)[PATH_MAX], unsigned int *idx, bool type)
 {
     char         temp[PATH_MAX] = {0};
@@ -42,7 +42,7 @@ static void _walk_for_each(const char *path,
         sprintf(temp, "%s%s", path, pdirent->d_name);
 
         if (IS_DIR(temp)) {
-            _walk_for_each(temp, file_path, idx, type ? true : false);
+            do_generic_walk(temp, file_path, idx, type ? true : false);
         } else {
             /* XXX user could specified his own filter rules */
             if (type == true) {
@@ -59,7 +59,7 @@ end:
     return;
 }
 
-static bool _walk_dir(char *dir_path,
+static bool __walk_dir(char *dir_path,
         char(*file_path)[PATH_MAX], unsigned int * num, bool type)
 {
     char     path[PATH_MAX] = {0};
@@ -71,7 +71,7 @@ static bool _walk_dir(char *dir_path,
     bool  ret = false;
 
     ret_ptr = getcwd(path, PATH_MAX);
-    assert(NULL != ret_ptr);
+    assert(ret_ptr);
 
     if (!dir_path) {
         printf("NULL dir path\n");
@@ -97,7 +97,7 @@ static bool _walk_dir(char *dir_path,
         dir_path = parents;
     }
 
-    _walk_for_each(dir_path, file_path, &index, type);
+    do_generic_walk(dir_path, file_path, &index, type);
 
     if (false == type) {
         *num = index;
@@ -110,26 +110,26 @@ static bool _walk_dir(char *dir_path,
 
 _finish_walk_dir:
     ret_value = chdir(path);
-    assert(0 != ret_value);
+    assert(0 == ret_value);
 
     return ret;
 }
 
 static bool _wkdir_get_file_num(char *dir_path, unsigned int *file_num)
 {
-    return _walk_dir(dir_path, NULL, file_num, false);
+    return __walk_dir(dir_path, NULL, file_num, false);
 }
 
 static bool _wkdir_get_file_path(char *dir_path, char (*file_path)[PATH_MAX])
 {
-    return _walk_dir(dir_path, file_path, NULL, true);
+    return __walk_dir(dir_path, file_path, NULL, true);
 }
 
 int main(int argc, char **argv)
 {
     bool        ret;
+    char        (*mp)[PATH_MAX] = NULL;
     unsigned int    file_num = 0;
-    char     (*mp)[PATH_MAX] = NULL;
 
     if (2 != argc) {
         printf("usage: walk_dir <pathname>\n");
@@ -137,24 +137,20 @@ int main(int argc, char **argv)
     }
 
     ret = _wkdir_get_file_num(argv[1], &file_num);
-    if (!ret) {
-        printf("fail to get file num\n");
+    if (false == ret) {
         goto _finish;
     }
     if (!file_num) {
-        printf("NO file in your specified path\n");
         goto _finish;
     }
 
     printf("file_num = %d\n", file_num);
     mp = (char(*)[PATH_MAX]) malloc(PATH_MAX * file_num);
     if (!mp) {
-        printf("out-of-memory\n");
         goto _finish;
     }
     ret = _wkdir_get_file_path(argv[1], mp);
-    if (!ret) {
-        printf("fail to get file path\n");
+    if (false == ret) {
         goto _finish;
     }
 
