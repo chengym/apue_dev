@@ -3,6 +3,27 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+/*
+ *      getpid();
+ *      getppid();
+ *
+ *      fork();
+ *      vfork();
+ *
+ *      wait();
+ *      waitpid();
+ *      waitid();
+ *      wait3();
+ *      wait4();
+ *
+ *      execl();
+ *      execv();
+ *      execle();
+ *      execve();
+ *      execlp();
+ *      execvp();
+ *
+ * */
 int globvar = 6;
 char buf[] = "a write to stdout\n";
 

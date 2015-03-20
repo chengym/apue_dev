@@ -5,6 +5,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+ *      signal();
+ *      sigaction();
+ *
+ *      kill();
+ *      raise();
+ *
+ *      alarm();
+ *      pause();
+ *
+ *      sigemptyset();
+ *      sigfillset();
+ *      sigaddset();
+ *      sigdelset();
+ *      sigismember();
+ *
+ *      sigprocmask();
+ *      sigpending();
+ *      sigsuspend();
+ *
+ * */
 
 static void sig_quit(int);
 
