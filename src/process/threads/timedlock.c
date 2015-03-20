@@ -1,4 +1,7 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <pthread.h>
 
 int main(void)

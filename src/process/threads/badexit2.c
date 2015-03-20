@@ -1,6 +1,23 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <pthread.h>
 
+
+/*
+ * pthread_equal();
+ * pthread_self();
+ *
+ * pthread_create();
+ * pthread_exit();
+ *
+ * pthread_join();
+ * pthread_cancel();
+ *
+ *
+ * */
 struct foo
 {
     int a, b, c, d;
@@ -38,15 +55,15 @@ int main(void)
 
     err = pthread_create(&tid1, NULL, thr_fn1, NULL);
     if (err != 0)
-        err_exit(err, "can't create thread 1");
+        perror("can't create thread 1");
     err = pthread_join(tid1, (void *) &fp);
     if (err != 0)
-        err_exit(err, "can't join with thread 1");
+        perror("can't join with thread 1");
     sleep(1);
     printf("parent starting second thread\n");
     err = pthread_create(&tid2, NULL, thr_fn2, NULL);
     if (err != 0)
-        err_exit(err, "can't create thread 2");
+        perror("can't create thread 2");
     sleep(1);
     printfoo("parent:\n", fp);
     exit(0);

@@ -3,6 +3,20 @@
 #include <unistd.h>
 #include <stdio.h>
 
+/*
+ * $ ./a.out &
+ * Child PID is 32360
+ * [1] 32359
+ * $ kill -STOP 32360
+ * stopped by signal 19
+ * $ kill -CONT 32360
+ * continued
+ * $ kill -TERM 32360
+ * killed by signal 15
+ * [1]+  Done                    ./a.out
+ * $
+ */
+
 int main(int argc, char *argv[])
 {
     pid_t cpid, w;

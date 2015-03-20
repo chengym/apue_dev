@@ -1,4 +1,8 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <pthread.h>
 #include <limits.h>
 #include <sys/time.h>
@@ -98,7 +102,7 @@ int main()
     for (i = 0; i < NTHR; i++) {
         err = pthread_create(&tid, NULL, thr_fn, (void *) (i * TNUM));
         if (err != 0)
-            err_exit(err, "can't create thread");
+            perror("can't create thread");
     }
     pthread_barrier_wait(&b);
     merge();

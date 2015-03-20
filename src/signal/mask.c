@@ -21,21 +21,17 @@ static void pr_mask(const char *str)
 
     errno_save = errno;         /* we can be called by signal handlers */
     if (sigprocmask(0, NULL, &sigset) < 0) {
-        perror("sigprocmask error");
+        perror("sigprocmask error\n");
     } else {
-        printf("%s", str);
+        printf("\n%s\n", str);
         if (sigismember(&sigset, SIGINT))
-            printf(" SIGINT");
+            printf(" SIGINT\n");
         if (sigismember(&sigset, SIGQUIT))
-            printf(" SIGQUIT");
+            printf(" SIGQUIT\n");
         if (sigismember(&sigset, SIGUSR1))
-            printf(" SIGUSR1");
+            printf(" SIGUSR1\n");
         if (sigismember(&sigset, SIGALRM))
-            printf(" SIGALRM");
-
-        /* remaining signals can go here  */
-
-        printf("\n");
+            printf(" SIGALRM\n");
     }
 
     errno = errno_save;         /* restore errno */
