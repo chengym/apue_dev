@@ -1,149 +1,161 @@
-#include <pthread.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <errno.h>
-#include <ctype.h>
+
+#include <pthread.h>
+
 /*
- * The program below demonstrates the use of pthread_create(), as well as a number of other functions in the pthreads API.
- * 
- * In the following run, on a system providing the NPTL threading implementation, the stack size defaults to the value given by the "stack size" resource limit:
- * 
- *     $ ulimit -s
- *     8192            # The stack size limit is 8 MB (0x800000 bytes)
- *     $ ./a.out hola salut servus
- *     Thread 1: top of stack near 0xb7dd03b8; argv_string=hola
- *     Thread 2: top of stack near 0xb75cf3b8; argv_string=salut
- *     Thread 3: top of stack near 0xb6dce3b8; argv_string=servus
- *     Joined with thread 1; returned value was HOLA
- *     Joined with thread 2; returned value was SALUT
- *     Joined with thread 3; returned value was SERVUS
- * 
- * In the next run, the program explicitly sets a stack size of 1MB (using pthread_attr_setstacksize(3)) for the created threads:
- * 
- *     $ ./a.out -s 0x100000 hola salut servus
- *     Thread 1: top of stack near 0xb7d723b8; argv_string=hola
- *     Thread 2: top of stack near 0xb7c713b8; argv_string=salut
- *     Thread 3: top of stack near 0xb7b703b8; argv_string=servus
- *     Joined with thread 1; returned value was HOLA
- *     Joined with thread 2; returned value was SALUT
- *     Joined with thread 3; returned value was SERVUS
- */
+ * *****************************************************************
+ * chapter 11
+ * threads
+ *      pthread_self();
+ *      pthread_equal();
+ *
+ *      pthread_create();
+ *      pthread_exit();
+ *      pthread_join();
+ *      pthread_cancel();
+ *      pthread_cleanup_push();
+ *      pthread_cleanup_pop();
+ *      pthread_detach();
+ *
+ * Thread Synchronization
+ *      mutex:
+ *          pthread_mutex_init();
+ *          pthread_mutex_destroy();
+ *          pthread_mutex_lock();
+ *          pthread_mutex_trylock();
+ *          pthread_mutex_unlock();
+ *          pthread_mutex_timedlock();
+ *      rw-lock:
+ *          pthread_rwlock_init();
+ *          pthread_rwlock_destroy();
+ *          pthread_rwlock_rdlock();
+ *          pthread_rwlock_wrlock();
+ *          pthread_rwlock_unlock();
+ *          pthread_rwlock_tryrdlock();
+ *          pthread_rwlock_trywrlock();
+ *          pthread_rwlock_timedrdlock();
+ *          pthread_rwlock_timedwrlock();
+ *      cond:
+ *          pthread_cond_init();
+ *          pthread_cond_destroy();
+ *          pthread_cond_wait();
+ *          pthread_cond_timedwait();
+ *          pthread_cond_signal();
+ *          pthread_cond_broadcast();
+ *      spin-lock:
+ *          pthread_spin_init();
+ *          pthread_spin_destroy();
+ *          pthread_spin_lock();
+ *          pthread_spin_trylock();
+ *          pthread_spin_unlock();
+ *      Barrier:
+ *          pthread_barrier_init();
+ *          pthread_barrier_destroy();
+ *          pthread_barrier_wait();
+ *
+ * *****************************************************************
+ * chapter 12
+ * attribute:
+ *      pthread_attr_init();
+ *      pthread_attr_destroy();
+ *      pthread_attr_getdetachstate();
+ *      pthread_attr_setdetachstate();
+ *      pthread_attr_getstack();
+ *      pthread_attr_setstack();
+ *      pthread_attr_getstacksize();
+ *      pthread_attr_setstacksize();
+ *      pthread_attr_getguardsize();
+ *      pthread_attr_setguardsize();
+ *
+ * sync:
+ *      mutex:
+ *          pthread_mutexattr_init();
+ *          pthread_mutexattr_destroy();
+ *          pthread_mutexattr_getpshared();
+ *          pthread_mutexattr_setpshared();
+ *          pthread_mutexattr_getrobust();
+ *          pthread_mutexattr_setrobust();
+ *          pthread_mutexattr_gettype();
+ *          pthread_mutexattr_settype();
+ *      rw-lock:
+ *          pthread_rwlockattr_init();
+ *          pthread_rwlockattr_destroy();
+ *          pthread_rwlockattr_getpshared();
+ *          pthread_rwlockattr_setpshared();
+ *      cond:
+ *          pthread_condattr_init();
+ *          pthread_condattr_destroy();
+ *          pthread_condattr_getpshared();
+ *          pthread_condattr_setpshared();
+ *          pthread_condattr_getclock();
+ *          pthread_condattr_setclock();
+ *      barrier:
+ *          pthread_barrierattr_init();
+ *          pthread_barrierattr_destroy();
+ *          pthread_barrierattr_getpshared();
+ *          pthread_barrierattr_setpshared();
+ *          pthread_barrierattr_init();
+ *
+ * Reentracy:
+ *      ftrylockfile();
+ *      flockfile();
+ *      funlockfile()
+ *      getchar_unlocked();
+ *      getc_runlocked();
+ *      putchar_runlocked();
+ *      putc_runlocked();
+ *
+ * private-data:
+ *      pthread_key_create();
+ *      pthread_key_delete();
+ *      pthread_once();
+ *      pthread_getspecific();
+ *      pthread_setspecific();
+ *
+ * cancel:
+ *      pthread_setcancelstate();
+ *      pthread_testcancel();
+ *      pthread_setcanceltype();
+ *  
+ *  thread-and-signal:
+ *      pthread_sigmask();
+ *      sigwait();
+ *      pthread_kill();
+ *
+ *  thread-and-fork:
+ *      pthread_atfork();
+ *
+ * */
+pthread_t ntid;
 
-#define handle_error_en(en, msg) \
-       do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
-
-#define handle_error(msg) \
-       do { perror(msg); exit(EXIT_FAILURE); } while (0)
-
-   struct thread_info {    /* Used as argument to thread_start() */
-       pthread_t thread_id;        /* ID returned by pthread_create() */
-       int       thread_num;       /* Application-defined thread # */
-       char     *argv_string;      /* From command-line argument */
-   };
-
-/* Thread start function: display address near top of our stack,
-   and return upper-cased copy of argv_string */
-
-    static void *
-thread_start(void *arg)
+void printids(const char *s)
 {
-    struct thread_info *tinfo = arg;
-    char *uargv, *p;
+    pid_t pid;
+    pthread_t tid;
 
-    printf("Thread %d: top of stack near %p; argv_string=%s\n",
-            tinfo->thread_num, &p, tinfo->argv_string);
-
-    uargv = strdup(tinfo->argv_string);
-    if (uargv == NULL)
-        handle_error("strdup");
-
-    for (p = uargv; *p != '\0'; p++)
-        *p = toupper(*p);
-
-    return uargv;
+    pid = getpid();
+    tid = pthread_self();
+    printf("%s pid %lu tid %lu (0x%lx)\n", s, (unsigned long) pid,
+           (unsigned long) tid, (unsigned long) tid);
 }
 
-int main(int argc, char *argv[])
+void *thr_fn(void *arg)
 {
-    int s, tnum, opt, num_threads;
-    struct thread_info *tinfo;
-    pthread_attr_t attr;
-    int stack_size;
-    void *res;
-
-    /* The "-s" option specifies a stack size for our threads */
-
-    stack_size = -1;
-    while ((opt = getopt(argc, argv, "s:")) != -1) {
-        switch (opt) {
-            case 's':
-                stack_size = strtoul(optarg, NULL, 0);
-                break;
-
-            default:
-                fprintf(stderr, "Usage: %s [-s stack-size] arg...\n",
-                        argv[0]);
-                exit(EXIT_FAILURE);
-        }
-    }
-
-    num_threads = argc - optind;
-
-    /* Initialize thread creation attributes */
-
-    s = pthread_attr_init(&attr);
-    if (s != 0)
-        handle_error_en(s, "pthread_attr_init");
-
-    if (stack_size > 0) {
-        s = pthread_attr_setstacksize(&attr, stack_size);
-        if (s != 0)
-            handle_error_en(s, "pthread_attr_setstacksize");
-    }
-
-    /* Allocate memory for pthread_create() arguments */
-
-    tinfo = calloc(num_threads, sizeof(struct thread_info));
-    if (tinfo == NULL)
-        handle_error("calloc");
-
-    /* Create one thread for each command-line argument */
-
-    for (tnum = 0; tnum < num_threads; tnum++) {
-        tinfo[tnum].thread_num = tnum + 1;
-        tinfo[tnum].argv_string = argv[optind + tnum];
-
-        /* The pthread_create() call stores the thread ID into
-           corresponding element of tinfo[] */
-
-        s = pthread_create(&tinfo[tnum].thread_id, &attr,
-                &thread_start, &tinfo[tnum]);
-        if (s != 0)
-            handle_error_en(s, "pthread_create");
-    }
-
-    /* Destroy the thread attributes object, since it is no
-       longer needed */
-
-    s = pthread_attr_destroy(&attr);
-    if (s != 0)
-        handle_error_en(s, "pthread_attr_destroy");
-
-    /* Now join with each thread, and display its returned value */
-
-    for (tnum = 0; tnum < num_threads; tnum++) {
-        s = pthread_join(tinfo[tnum].thread_id, &res);
-        if (s != 0)
-            handle_error_en(s, "pthread_join");
-
-        printf("Joined with thread %d; returned value was %s\n",
-                tinfo[tnum].thread_num, (char *) res);
-        free(res);      /* Free memory allocated by thread */
-    }
-
-    free(tinfo);
-    exit(EXIT_SUCCESS);
+    printids("new thread: ");
+    return ((void *) 0);
 }
 
+int main(void)
+{
+    int err;
+
+    err = pthread_create(&ntid, NULL, thr_fn, NULL);
+    if (err != 0)
+        perror("can't create thread");
+    printids("main thread:");
+    sleep(1);
+    exit(0);
+}

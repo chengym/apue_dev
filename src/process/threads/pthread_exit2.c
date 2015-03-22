@@ -5,19 +5,6 @@
 
 #include <pthread.h>
 
-
-/*
- * pthread_equal();
- * pthread_self();
- *
- * pthread_create();
- * pthread_exit();
- *
- * pthread_join();
- * pthread_cancel();
- *
- *
- * */
 struct foo
 {
     int a, b, c, d;

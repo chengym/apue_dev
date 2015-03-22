@@ -1,119 +1,60 @@
-/*
- * The program below provides a simple example of the use of the functions described in this page.  The program creates a thread that executes a loop bracketed by  pthread_cleanup_push()  and  pthread_cleanup_pop().   This  loop
- * increments  a  global  variable,  cnt,  once  each second.  Depending on what command-line arguments are supplied, the main thread sends the other thread a cancellation request, or sets a global variable that causes the other
- * thread to exit its loop and terminate normally (by doing a return).
- * 
- * In the following shell session, the main thread sends a cancellation request to the other thread:
- * 
- *     $ ./a.out
- *     New thread started
- *     cnt = 0
- *     cnt = 1
- *     Canceling thread
- *     Called clean-up handler
- *     Thread was canceled; cnt = 0
- * 
- * From the above, we see that the thread was canceled, and that the cancellation clean-up handler was called and it reset the value of the global variable cnt to 0.
- * 
- * In the next run, the main program sets a global variable that causes other thread to terminate normally:
- * 
- *     $ ./a.out x
- *     New thread started
- *     cnt = 0
- *     cnt = 1
- *     Thread terminated normally; cnt = 2
- * 
- * From the above, we see that the clean-up handler was not executed (because cleanup_pop_arg was 0), and therefore the value of cnt was not reset.
- * 
- * In the next run, the main program sets a global variable that causes the other thread to terminate normally, and supplies a nonzero value for cleanup_pop_arg:
- * 
- *     $ ./a.out x 1
- *     New thread started
- *     cnt = 0
- *     cnt = 1
- *     Called clean-up handler
- *     Thread terminated normally; cnt = 0
- * 
- * In the above, we see that although the thread was not canceled, the clean-up handler was executed, because the argument given to pthread_cleanup_pop() was nonzero.
- */
-
-#include <pthread.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <errno.h>
 
-#define handle_error_en(en, msg) \
-    do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+#include <pthread.h>
 
-static int done = 0;
-static int cleanup_pop_arg = 0;
-static int cnt = 0;
-
-    static void
-cleanup_handler(void *arg)
+void cleanup(void *arg)
 {
-    printf("Called clean-up handler\n");
-    cnt = 0;
+    printf("cleanup: %s\n", (char *) arg);
 }
 
-    static void *
-thread_start(void *arg)
+void *thr_fn1(void *arg)
 {
-    time_t start, curr;
-
-    printf("New thread started\n");
-
-    pthread_cleanup_push(cleanup_handler, NULL);
-
-    curr = start = time(NULL);
-
-    while (!done) {
-        pthread_testcancel();           /* A cancellation point */
-        if (curr < time(NULL)) {
-            curr = time(NULL);
-            printf("cnt = %d\n", cnt);  /* A cancellation point */
-            cnt++;
-        }
-    }
-
-    pthread_cleanup_pop(cleanup_pop_arg);
-    return NULL;
+    printf("thread 1 start\n");
+    pthread_cleanup_push(cleanup, "thread 1 first handler");
+    pthread_cleanup_push(cleanup, "thread 1 second handler");
+    printf("thread 1 push complete\n");
+    if (arg)
+        return ((void *) 1);
+    pthread_cleanup_pop(0);
+    pthread_cleanup_pop(0);
+    return ((void *) 1);
 }
 
-int main(int argc, char *argv[])
+void *thr_fn2(void *arg)
 {
-    pthread_t thr;
-    int s;
-    void *res;
-
-    s = pthread_create(&thr, NULL, thread_start, NULL);
-    if (s != 0)
-        handle_error_en(s, "pthread_create");
-
-    sleep(2);           /* Allow new thread to run a while */
-
-    if (argc > 1) {
-        if (argc > 2)
-            cleanup_pop_arg = atoi(argv[2]);
-        done = 1;
-
-    } else {
-        printf("Canceling thread\n");
-        s = pthread_cancel(thr);
-        if (s != 0)
-            handle_error_en(s, "pthread_cancel");
-    }
-
-    s = pthread_join(thr, &res);
-    if (s != 0)
-        handle_error_en(s, "pthread_join");
-
-    if (res == PTHREAD_CANCELED)
-        printf("Thread was canceled; cnt = %d\n", cnt);
-    else
-        printf("Thread terminated normally; cnt = %d\n", cnt);
-    exit(EXIT_SUCCESS);
+    printf("thread 2 start\n");
+    pthread_cleanup_push(cleanup, "thread 2 first handler");
+    pthread_cleanup_push(cleanup, "thread 2 second handler");
+    printf("thread 2 push complete\n");
+    if (arg)
+        pthread_exit((void *) 2);
+    pthread_cleanup_pop(0);
+    pthread_cleanup_pop(0);
+    pthread_exit((void *) 2);
 }
 
+int main(void)
+{
+    int err;
+    pthread_t tid1, tid2;
+    void *tret;
+
+    err = pthread_create(&tid1, NULL, thr_fn1, (void *) 1);
+    if (err != 0)
+        perror("can't create thread 1");
+    err = pthread_create(&tid2, NULL, thr_fn2, (void *) 1);
+    if (err != 0)
+        perror("can't create thread 2");
+    err = pthread_join(tid1, &tret);
+    if (err != 0)
+        perror("can't join with thread 1");
+    printf("thread 1 exit code %ld\n", (long) tret);
+    err = pthread_join(tid2, &tret);
+    if (err != 0)
+        perror("can't join with thread 2");
+    printf("thread 2 exit code %ld\n", (long) tret);
+    exit(0);
+}

@@ -1,4 +1,9 @@
-#include "apue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+
 #include <pthread.h>
 
 int quitflag;                   /* set nonzero by thread */
@@ -14,7 +19,7 @@ void *thr_fn(void *arg)
     for (;;) {
         err = sigwait(&mask, &signo);
         if (err != 0)
-            err_exit(err, "sigwait failed");
+            perror("sigwait failed");
         switch (signo) {
             case SIGINT:
                 printf("\ninterrupt\n");
@@ -44,11 +49,11 @@ int main(void)
     sigaddset(&mask, SIGINT);
     sigaddset(&mask, SIGQUIT);
     if ((err = pthread_sigmask(SIG_BLOCK, &mask, &oldmask)) != 0)
-        err_exit(err, "SIG_BLOCK error");
+        perror("SIG_BLOCK error");
 
     err = pthread_create(&tid, NULL, thr_fn, 0);
     if (err != 0)
-        err_exit(err, "can't create thread");
+        perror("can't create thread");
 
     pthread_mutex_lock(&lock);
     while (quitflag == 0)
@@ -60,6 +65,6 @@ int main(void)
 
     /* reset signal mask which unblocks SIGQUIT */
     if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
-        err_sys("SIG_SETMASK error");
+        perror("SIG_SETMASK error");
     exit(0);
 }

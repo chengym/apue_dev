@@ -115,7 +115,8 @@ int main()
     endusec = end.tv_sec * 1000000 + end.tv_usec;
     elapsed = (double) (endusec - startusec) / 1000000.0;
     printf("sort took %.4f seconds\n", elapsed);
-    for (i = 0; i < NUMNUM; i++)
-        printf("%ld\n", snums[i]);
+   /* for (i = 0; i < NUMNUM; i++)
+   *     printf("%ld\n", snums[i]);
+   *     */
     exit(0);
 }

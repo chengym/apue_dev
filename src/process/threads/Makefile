@@ -5,8 +5,9 @@ BAR = barrier
 EXTRALIBS=-pthread -lrt
 CFLAGS += $(EXTRALIBS)
 
-PROGS = badexit2 cleanup exitstatus threadid
-PROGS += pthread_create
+PROGS = pthread_create
+PROGS += pthread_exit
+PROGS += pthread_exit2
 PROGS += pthread_cancel
 PROGS += pthread_cleanup_push
 
