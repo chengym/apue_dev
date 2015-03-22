@@ -44,7 +44,7 @@ int main(void)
     if (sigprocmask(SIG_BLOCK, &newmask, &oldmask) < 0)
         perror("SIG_BLOCK error");
 
-    sleep(1);                   /* SIGQUIT here will remain pending */
+    sleep(5);                   /* SIGQUIT here will remain pending */
 
     if (sigpending(&pendmask) < 0)
         perror("sigpending error");
@@ -58,7 +58,7 @@ int main(void)
         perror("SIG_SETMASK error");
     printf("SIGQUIT unblocked\n");
 
-    sleep(1);                   /* SIGQUIT here will terminate with core file */
+    sleep(5);                   /* SIGQUIT here will terminate with core file */
     exit(0);
 }
 

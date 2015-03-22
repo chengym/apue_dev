@@ -5,6 +5,7 @@ CLD = child
 
 PROGS =	critical mask read1 read2 reenter sigtstp sigusr suspend1 suspend2 sleep1
 PROGS += sigprocmask
+PROGS += 10.6
 MOREPROGS = systest2 tsleep2
 
 all:$(PROGS) $(MOREPROGS) abort.o sleep1.o sleep2.o system.o $(CLD)

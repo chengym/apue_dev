@@ -8,6 +8,14 @@
 
 #include <errno.h>
 
+/*
+ * sigsuspend的整个原子操作过程为：
+ * (1) 设置新的mask阻塞当前进程；
+ * (2) 收到信号，恢复原先mask；
+ * (3) 调用该进程设置的信号处理函数；
+ * (4) 待信号处理函数返回后，sigsuspend返回。
+ */
+
 static void sig_int(int);
 
 static void pr_mask(const char *str)
