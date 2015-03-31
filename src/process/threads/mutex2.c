@@ -30,11 +30,13 @@ struct foo *foo_alloc(int id)
             return (NULL);
         }
         idx = HASH(id);
+
         pthread_mutex_lock(&hashlock);
         fp->f_next = fh[idx];
         fh[idx] = fp;
         pthread_mutex_lock(&fp->f_lock);
         pthread_mutex_unlock(&hashlock);
+
         /* ... continue initialization ... */
         pthread_mutex_unlock(&fp->f_lock);
     }

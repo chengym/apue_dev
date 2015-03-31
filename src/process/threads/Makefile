@@ -10,7 +10,7 @@ PROGS += pthread_exit
 PROGS += pthread_exit2
 PROGS += pthread_cancel
 PROGS += pthread_cleanup_push
-PROGS += cond
+PROGS += pthread_cond
 
 all:$(PROGS) condvar.o maketimeout.o mutex1.o mutex2.o mutex3.o rwlock.o $(TLOCK) $(BAR)
 

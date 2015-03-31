@@ -1,105 +1,123 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-struct job
-{
-    struct job *j_next;
-    struct job *j_prev;
-    pthread_t j_id;             /* tells which thread handles this job */
-    /* ... more stuff here ... */
-};
+#include "list.h"
 
-struct queue
+/*=============================================================*/
+typedef struct _job
 {
-    struct job *q_head;
-    struct job *q_tail;
+    list_head node;
+
+    pthread_t j_id;
+}job;
+
+typedef struct _queue
+{
+    list_head head;
+    unsigned int num;
+
     pthread_rwlock_t q_lock;
-};
+}queue;
+
+int queue_init(queue *qp);
+void job_insert(queue *qp, job *jp);
+void job_append(queue *qp, job *jp);
+void job_remove(queue *qp, job *jp);
+job *job_find(queue *qp, pthread_t id);
+
+/*=============================================================*/
 
 /*
  * Initialize a queue.
  */
-int queue_init(struct queue *qp)
+int queue_init(queue *qp)
 {
     int err;
 
-    qp->q_head = NULL;
-    qp->q_tail = NULL;
+    INIT_LIST_HEAD(&(qp->head));
+
     err = pthread_rwlock_init(&qp->q_lock, NULL);
-    if (err != 0)
-        return (err);
-    /* ... continue initialization ... */
-    return (0);
+    if (err != 0) {
+        perror("pthread_rwlock_init");
+    }
+
+    return 0;
 }
 
 /*
  * Insert a job at the head of the queue.
  */
-void job_insert(struct queue *qp, struct job *jp)
+void job_insert(queue *qp, job *jp)
 {
+    /* get wrlock, blocked by the existed rdlock but block the comming rdlock */
     pthread_rwlock_wrlock(&qp->q_lock);
-    jp->j_next = qp->q_head;
-    jp->j_prev = NULL;
-    if (qp->q_head != NULL)
-        qp->q_head->j_prev = jp;
-    else
-        qp->q_tail = jp;        /* list was empty */
-    qp->q_head = jp;
+
+    list_add(&(jp->node), &(qp->head));
+
+    /* release wrlock, this will wakeup the rdlock or wrlock */
     pthread_rwlock_unlock(&qp->q_lock);
 }
 
 /*
  * Append a job on the tail of the queue.
  */
-void job_append(struct queue *qp, struct job *jp)
+void job_append(queue *qp, job *jp)
 {
+    /* get wrlock, blocked by the existed rdlock but block the comming rdlock */
     pthread_rwlock_wrlock(&qp->q_lock);
-    jp->j_next = NULL;
-    jp->j_prev = qp->q_tail;
-    if (qp->q_tail != NULL)
-        qp->q_tail->j_next = jp;
-    else
-        qp->q_head = jp;        /* list was empty */
-    qp->q_tail = jp;
+
+    list_add_tail(&(jp->node), &(qp->head));
+
+    /* release wrlock, this will wakeup the rdlock or wrlock */
     pthread_rwlock_unlock(&qp->q_lock);
 }
 
 /*
  * Remove the given job from a queue.
  */
-void job_remove(struct queue *qp, struct job *jp)
+void job_remove(queue *qp, job *jp)
 {
+    /* get wrlock, blocked by the existed rdlock but block the comming rdlock */
     pthread_rwlock_wrlock(&qp->q_lock);
-    if (jp == qp->q_head) {
-        qp->q_head = jp->j_next;
-        if (qp->q_tail == jp)
-            qp->q_tail = NULL;
-        else
-            jp->j_next->j_prev = jp->j_prev;
-    } else if (jp == qp->q_tail) {
-        qp->q_tail = jp->j_prev;
-        jp->j_prev->j_next = jp->j_next;
-    } else {
-        jp->j_prev->j_next = jp->j_next;
-        jp->j_next->j_prev = jp->j_prev;
-    }
+
+    list_del(&(jp->node));
+    qp->
+
+    /* release wrlock */
     pthread_rwlock_unlock(&qp->q_lock);
 }
 
 /*
  * Find a job for the given thread ID.
  */
-struct job *job_find(struct queue *qp, pthread_t id)
+job *job_find(queue *qp, pthread_t id)
 {
-    struct job *jp;
+    job *jp;
+    list_head *list;
 
-    if (pthread_rwlock_rdlock(&qp->q_lock) != 0)
+    /* get rdlock, only blocked by wrlock */
+    if (pthread_rwlock_rdlock(&qp->q_lock) != 0) {
         return (NULL);
+    }
 
-    for (jp = qp->q_head; jp != NULL; jp = jp->j_next)
-        if (pthread_equal(jp->j_id, id))
+    list_for_each(list, &(qp->head)) {
+        jp = list_entry(list, job, node);
+        if (pthread_equal(jp->j_id, id)) {
+            pthread_cond_signal(&cond);
             break;
+        } else {
+            jp = NULL;
+        }
+    }
 
+    /* release rwlock */
     pthread_rwlock_unlock(&qp->q_lock);
-    return (jp);
+    return jp;
+}
+
+/*=============================================================*/
+
+static void reader()
+{
+
 }

@@ -6,6 +6,7 @@ ZAP = zap
 PROGS =	access cdpwd chmod devrdev filetype mycd umask unlink $(ZAP)
 PROGS += stat
 PROGS += walk_dir
+PROGS += ls
 MOREPROGS = ftw8
 
 all: $(PROGS) $(MOREPROGS)
