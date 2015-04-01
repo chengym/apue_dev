@@ -8,13 +8,14 @@
 typedef struct _job
 {
     struct _job *next;
-    void *(*callback_function) (void *arg);
+
+    void *(*callback_function)(void *arg);
     void *arg;
 }job;
 
 typedef struct _threadpool
 {
-    /* the maxnum threads and jobs */
+    /* the maxnum of threads and jobs */
     int thread_num;
     int queue_max_num;
 
@@ -32,6 +33,7 @@ typedef struct _threadpool
 
     int queue_cur_num;
 
+    /* 0: open, 1: close */
     int queue_close;
     int pool_close;
 }threadpool;
